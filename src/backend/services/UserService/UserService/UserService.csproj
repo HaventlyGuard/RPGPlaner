@@ -38,7 +38,6 @@
       <Folder Include="DTO\RefreshToken\" />
       <Folder Include="DTO\Role\" />
       <Folder Include="DTO\UserSettings\" />
-      <Folder Include="Services\Interfaces\" />
     </ItemGroup>
 
 </Project>
