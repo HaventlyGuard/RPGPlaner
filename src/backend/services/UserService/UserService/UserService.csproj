@@ -33,14 +33,11 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
-      <Folder Include="DataAcces\Migrations\" />
       <Folder Include="DTO\Permission\" />
       <Folder Include="DTO\PrivacySettings\" />
       <Folder Include="DTO\RefreshToken\" />
       <Folder Include="DTO\Role\" />
       <Folder Include="DTO\UserSettings\" />
-      <Folder Include="DTO\User\" />
-      <Folder Include="Repository\Intefaces\" />
       <Folder Include="Services\Interfaces\" />
     </ItemGroup>
 

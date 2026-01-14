@@ -39,21 +39,18 @@ public class ApplicationContext : DbContext
             entity.Property(u => u.IsAdmin)
                 .HasDefaultValue(false);
             
-            // Для byte[] не нужно указывать TypeName в атрибутах, если указали в модели
             entity.Property(u => u.AvatarByte)
                 .HasColumnType("bytea");
             
             entity.Property(u => u.AvatarType)
                 .HasMaxLength(100);
             
-            // Связь с RefreshTokens
             entity.HasMany(u => u.RefreshTokens)
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
-        // Конфигурация RefreshToken
         modelBuilder.Entity<RefreshToken>(entity =>
         {
             entity.ToTable("refresh_tokens");
