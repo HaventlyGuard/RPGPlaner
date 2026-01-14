@@ -7,12 +7,11 @@ namespace UserService.Models;
 public class User
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("id")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    [Column("user_name")]
+    [Column("username")]
     [MaxLength(50)]
     public string Username { get; set; } = string.Empty;
 
@@ -26,19 +25,16 @@ public class User
     [MaxLength(50)]
     public string LastName { get; set; } = string.Empty;
 
-    [Column("avatar", TypeName = "bytea")]
-    public byte[]? Avatar { get; set; }
-
     [Column("avatar_url")]
     [MaxLength(500)]
     public string? AvatarUrl { get; set; }
-
-    [Column("avatar_size")]
-    public long? AvatarSize { get; set; }
-
-    [Column("avatar_mime_type")]
-    [MaxLength(100)]
-    public string? AvatarMimeType { get; set; }
+    
+    [Column("avatar_byte", TypeName = "bytea")]
+    public byte[]? AvatarByte { get; set; }
+    
+    [Column("avatar_type", TypeName = "varchar")]
+    public string? AvatarType { get; set; }
+    
 
     [Required]
     [EmailAddress]
@@ -56,17 +52,11 @@ public class User
     [MaxLength(255)]
     public string PasswordSalt { get; set; } = string.Empty;
 
-    [Column("update_at")]
-    public DateTime? UpdateAt { get; set; }
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Column("create_at")]
-    public DateTime CreateAt { get; set; } = DateTime.UtcNow;
-
-    [Column("direct_permissions", TypeName = "jsonb")]
-    public List<Permission> DirectPermissions { get; set; } = new();
-
-    [Column("team_ids", TypeName = "uuid[]")]
-    public List<Guid> TeamIds { get; set; } = new();
+    [Column("last_login")]
+    public DateTime? LastLogin { get; set; }
 
     [Column("is_email_verified")]
     public bool IsEmailVerified { get; set; } = false;
@@ -74,34 +64,12 @@ public class User
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
-    [Column("is_banned")]
-    public bool IsBanned { get; set; } = false;
-
-    [Column("banned_until")]
-    public DateTime? BannedUntil { get; set; }
-
-    [Column("ban_reason")]
-    [MaxLength(500)]
-    public string? BanReason { get; set; }
-
-    [Column("role_id")]
-    public Guid? RoleId { get; set; }
-
-    public virtual Role? Role { get; set; }
-
-    [Column("permissions", TypeName = "text[]")]
-    public List<string> Permissions { get; set; } = new();
-
-    [Column("character_id")]
-    public Guid CharacterId { get; set; }
-
-    // ComplexType - будут сохранены как JSONB в таблице users
+    [Column("is_admin")]
+    public bool IsAdmin { get; set; } = false; // Простая проверка на админа
+    // Настройки пользователя как простой JSON
     [Column("settings", TypeName = "jsonb")]
     public UserSettings Settings { get; set; } = new();
 
-    [Column("privacy_settings", TypeName = "jsonb")]
-    public PrivacySettings PrivacySettings { get; set; } = new();
-
-    // Навигационные свойства
-    public virtual RefreshToken RefreshTokens { get; set; }
+    // Связь с токенами
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

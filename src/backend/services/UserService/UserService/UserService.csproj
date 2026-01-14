@@ -33,6 +33,7 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
+      <Folder Include="DataAcces\Migrations\" />
       <Folder Include="DTO\Permission\" />
       <Folder Include="DTO\PrivacySettings\" />
       <Folder Include="DTO\RefreshToken\" />

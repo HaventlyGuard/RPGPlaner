@@ -7,15 +7,14 @@ namespace UserService.Models;
 public class RefreshToken
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("id")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [Column("user_id")]
     public Guid UserId { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User User { get; set; } = null!;
 
     [Required]
     [Column("token")]
@@ -36,14 +35,6 @@ public class RefreshToken
 
     [Column("revoked_at")]
     public DateTime? RevokedAt { get; set; }
-
-    [Column("revoked_by_ip")]
-    [MaxLength(45)]
-    public string? RevokedByIp { get; set; }
-
-    [Column("replaced_by_token")]
-    [MaxLength(500)]
-    public string? ReplacedByToken { get; set; }
 
     [Column("reason_revoked")]
     [MaxLength(200)]
