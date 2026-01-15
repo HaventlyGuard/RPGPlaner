@@ -5,20 +5,20 @@ namespace UserService.Services.Interfaces;
 
 public interface IUserService
 {
-    public Task<ResponseUserDTO?> GetUserByEmail(string email);
-    public Task<ResponseUserDTO?> GetUserByUserId(Guid userId);
-    public Task<ResponseUserDTO?> GetUserByUserName(string username);
-    public Task<IQueryable<ResponseUserDTO>?> GetAllUsers();
+    public Task<ResponseUserDTO?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
+    public Task<ResponseUserDTO?> GetUserByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    public Task<ResponseUserDTO?> GetUserByUserNameAsync(string username, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<ResponseUserDTO>?> GetAllUsersAsync(CancellationToken cancellationToken = default);
     
-    public Task<CreateUserDTO> CreateUser(CreateUserDTO createdUser);
-    public Task<UpdateUserDTO> UpdateUser(UpdateUserDTO updatedUser);
+    public Task<CreateUserDTO> CreateUserAsync(CreateUserDTO createdUser,string salt, CancellationToken cancellationToken = default);
+    public Task<UpdateUserDTO> UpdateUserAsync(UpdateUserDTO updatedUser, CancellationToken cancellationToken = default);
     
-    public Task<bool> DeleteUser(Guid userId);
-    public Task<bool> SoftDeleteUser(Guid userId);
+    public Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default);
+    public Task<bool> SoftDeleteUserAsync(Guid userId, CancellationToken cancellationToken = default);
     
-    Task<bool> ExistsByEmailAsync(string email);
-    Task<bool> ExistsByUsernameAsync(string username);
-    Task<bool> UpdateLastLoginAsync(Guid userId);
-    Task<bool> UpdateAvatarAsync(Guid userId, byte[] avatarData, string avatarType);
-    Task<bool> UpdateSettingsAsync(Guid userId, UserSettings settings);
+    Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByUsernameAsync(string username, CancellationToken cancellationToken = default);
+    Task<bool> UpdateLastLoginAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAvatarAsync(Guid userId, byte[] avatarData, string avatarType, CancellationToken cancellationToken = default);
+    Task<bool> UpdateSettingsAsync(Guid userId, UserSettings settings, CancellationToken cancellationToken = default);
 }

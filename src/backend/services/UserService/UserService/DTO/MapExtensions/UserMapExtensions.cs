@@ -11,7 +11,7 @@ public static class UserMapExtensions
         {
             Id = Guid.NewGuid(),
             Email = createDto.Email,
-            PasswordHash = createDto.PasswordHash, 
+            PasswordHash = createDto.Password, 
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -68,8 +68,7 @@ public static class UserMapExtensions
         {
             Email = responseUser.Email,
             Username = responseUser.Username,
-            PasswordHash = responseUser.PasswordHash,
-            Id = responseUser.Id,
+            Password = responseUser.PasswordHash,
 
         };
     }
