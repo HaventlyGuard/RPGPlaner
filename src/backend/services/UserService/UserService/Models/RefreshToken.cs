@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using UserService.Repository.Intefaces;
 
 namespace UserService.Models;
 
 [Table("refresh_tokens")]
-public class RefreshToken
+public class RefreshToken 
 {
     [Key]
     [Column("id")]

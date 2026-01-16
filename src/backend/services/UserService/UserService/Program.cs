@@ -1,8 +1,14 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using UserService.DataAcces;
+using UserService.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using UserService.Models;
+using UserService.Repository;
+using UserService.Repository.Intefaces;
+using UserService.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +32,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -40,15 +45,25 @@ builder.Services.AddSwaggerGen(c =>
         Format = "binary"
     });
 });
+builder.Services.AddEndpointsApiExplorer();
+
 
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+
 var app = builder.Build();
+app.UseCors("AllowFrontend");
+app.UseSwagger();
+
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler("/Home/Error");
@@ -60,7 +75,8 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     dbContext.Database.Migrate(); 
 }
-
+app.UseExceptionHandler("/Home/Error");
+app.UseHsts();
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -73,5 +89,5 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-
+app.MapControllers();
 app.Run();

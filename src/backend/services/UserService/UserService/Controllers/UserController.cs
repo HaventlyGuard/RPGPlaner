@@ -16,11 +16,22 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet]
+    [HttpGet("users")]
     public ActionResult<IEnumerable<User>> GetAllUsers()
     {
         var users = _userService.GetAllUsersAsync();
+        if (users == null) BadRequest("User not found");
         return Ok(users);
     }
+
+    [HttpGet("users/{id}")]
+    public ActionResult<User> GetUserById(Guid id)
+    {
+        var user = _userService.GetUserByUserIdAsync(id);
+        if (user == null) BadRequest("User not found");
+        return Ok(user);
+    }
+    
+    
     
 }
