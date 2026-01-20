@@ -17,9 +17,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("users")]
-    public ActionResult<IEnumerable<User>> GetAllUsers()
+    public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
     {
-        var users = _userService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync();
         if (users == null) BadRequest("User not found");
         return Ok(users);
     }
