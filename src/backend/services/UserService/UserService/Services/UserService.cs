@@ -55,7 +55,7 @@ public class UserService : IUserService
         return usersList.Select(u=> u.UserToResponseUser());
     }
 
-    public async Task<CreateUserDTO> CreateUserAsync(CreateUserDTO createdUser,string salt, CancellationToken cancellationToken = default)
+    public async Task<CreateUserDTO> CreateUserAsync(CreateUserDTO createdUser, CancellationToken cancellationToken = default)
     {
         if(createdUser == null || isDangerInput(createdUser.Email) || isDangerInput(createdUser.Username)) return null;
         var PasswordHashAndSalt= PasswordHashSaltGenerator(password: createdUser.Password);

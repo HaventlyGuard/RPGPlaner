@@ -10,7 +10,7 @@ public interface IUserService
     public Task<ResponseUserDTO?> GetUserByUserNameAsync(string username, CancellationToken cancellationToken = default);
     public Task<IEnumerable<ResponseUserDTO>?> GetAllUsersAsync(CancellationToken cancellationToken = default);
     
-    public Task<CreateUserDTO> CreateUserAsync(CreateUserDTO createdUser,string salt, CancellationToken cancellationToken = default);
+    public Task<CreateUserDTO> CreateUserAsync(CreateUserDTO createdUser, CancellationToken cancellationToken = default);
     public Task<UpdateUserDTO> UpdateUserAsync(UpdateUserDTO updatedUser, CancellationToken cancellationToken = default);
     
     public Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default);

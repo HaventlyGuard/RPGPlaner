@@ -16,10 +16,8 @@ public class ApplicationContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         
-        // Конфигурация User
         modelBuilder.Entity<User>(entity =>
         {
-            // Явно указываем имя таблицы
             entity.ToTable("users");
             
             entity.HasKey(e => e.Id);
@@ -27,8 +25,6 @@ public class ApplicationContext : DbContext
             entity.HasIndex(u => u.Username).IsUnique();
             entity.HasIndex(u => u.Email).IsUnique();
             
-            entity.Property(u => u.CreatedAt)
-                .HasDefaultValueSql("NOW()");
             
             entity.Property(u => u.IsActive)
                 .HasDefaultValue(true);
@@ -59,8 +55,6 @@ public class ApplicationContext : DbContext
             
             entity.HasIndex(rt => rt.Token).IsUnique();
             
-            entity.Property(rt => rt.CreatedAt)
-                .HasDefaultValueSql("NOW()");
         });
     }
 }

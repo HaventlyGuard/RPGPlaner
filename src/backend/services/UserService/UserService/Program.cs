@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using UserService.DataAcces;
 using UserService.Services;
 using UserService.Models;
@@ -53,6 +54,9 @@ builder.Services.AddSwaggerGen(c =>
 // DB Context
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+
+NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
 // Dependency Injection
 builder.Services.AddScoped<IUserService, UserService.Services.UserService>();

@@ -8,6 +8,7 @@ namespace UserService.Models;
 public class RefreshToken 
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -32,7 +33,7 @@ public class RefreshToken
     [Required]
     [Column("created_by_ip")]
     [MaxLength(45)]
-    public string CreatedByIp { get; set; } = string.Empty;
+    public Guid CreatedByIp { get; set; } = Guid.Empty;
 
     [Column("revoked_at")]
     public DateTime? RevokedAt { get; set; }

@@ -7,7 +7,7 @@ using UserService.Models;
 namespace UserService.Migrations
 {
     /// <inheritdoc />
-    public partial class SimpleComp4 : Migration
+    public partial class FixDateTime : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,7 +26,7 @@ namespace UserService.Migrations
                     email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     password_salt = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     last_login = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     is_email_verified = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
@@ -46,8 +46,8 @@ namespace UserService.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     token = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
-                    created_by_ip = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by_ip = table.Column<Guid>(type: "uuid", maxLength: 45, nullable: false),
                     revoked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     reason_revoked = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
                 },

@@ -7,6 +7,7 @@ namespace UserService.Models;
 public class User
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -53,10 +54,11 @@ public class User
     public string PasswordSalt { get; set; } = string.Empty;
 
     [Column("created_at")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Column("last_login")]
-    public DateTime? LastLogin { get; set; }
+    [Column("last_login")] 
+    public DateTime? LastLogin { get; set; } = DateTime.UtcNow;
 
     [Column("is_email_verified")]
     public bool IsEmailVerified { get; set; } = false;
@@ -65,11 +67,9 @@ public class User
     public bool IsActive { get; set; } = true;
 
     [Column("is_admin")]
-    public bool IsAdmin { get; set; } = false; // Простая проверка на админа
-    // Настройки пользователя как простой JSON
+    public bool IsAdmin { get; set; } = false; 
     [Column("settings", TypeName = "jsonb")]
     public UserSettings Settings { get; set; } = new();
 
-    // Связь с токенами
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

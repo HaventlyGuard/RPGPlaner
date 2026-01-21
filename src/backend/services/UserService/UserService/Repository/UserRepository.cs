@@ -48,9 +48,7 @@ public class UserRepository : IUserRepository
         {
             PasswordSalt = salt,
             PasswordHash = createdUser.PasswordHash,
-            CreatedAt = DateTime.Now,
             IsActive = true,
-            LastLogin = DateTime.Now,
             Username = createdUser.Username,
             Email = createdUser.Email,
             Settings = createdUser.Settings
