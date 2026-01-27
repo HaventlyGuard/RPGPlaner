@@ -11,6 +11,10 @@ using UserService.Services.Interfaces;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -37,13 +41,11 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "User Service API", Version = "v1" });
     
-    // XML комментарии (опционально)
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
         c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
     
-    // Для IFormFile
     c.MapType<IFormFile>(() => new OpenApiSchema
     {
         Type = "string",
@@ -51,18 +53,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// DB Context
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
     
 
 NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
-// Dependency Injection
 builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<JwtProvider>();
 
 var app = builder.Build();
 
@@ -86,6 +87,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseRouting();
 app.UseAuthorization();
+app.UseAuthentication();
 app.MapStaticAssets(); // Если нужно
 app.MapControllers();
 

@@ -1,5 +1,6 @@
 ﻿
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Identity.Data;
 using UserService.DTO.MapExtensions;
 using UserService.DTO.User;
 using UserService.Models;
@@ -12,9 +13,11 @@ namespace UserService.Services;
 public class UserService : IUserService
 {
     private  IUserRepository _userRepository;
-    public UserService(IUserRepository userRepository)
+    private JwtProvider _jwtProvider;
+    public UserService(IUserRepository userRepository,  JwtProvider jwtProvider)
     {
         _userRepository = userRepository;
+        _jwtProvider = jwtProvider;
     }
     
     public async Task<ResponseUserDTO?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -71,6 +74,26 @@ public class UserService : IUserService
         return user.UserToUpdateUser();
     }
 
+    public async Task Register(CreateUserDTO createdUser, CancellationToken cancellationToken = default)
+    {
+        var user = await CreateUserAsync(createdUser, cancellationToken);
+    }
+
+    public async Task<string> Login(string email, string password, CancellationToken cancellationToken = default)
+    {
+        if(!await _userRepository.ExistsByEmailAsync(email,cancellationToken)) return null!;
+        var user = await _userRepository.GetUserByEmail(email, cancellationToken);
+        if (!Vertify(password, user!.PasswordSalt, user.PasswordHash))
+        {
+            Console.WriteLine("User not registered");
+            return "";
+        };
+
+        var token = _jwtProvider.CreateToken(user);
+        return token;
+
+
+    }
     public async Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetUserByUserId(userId, cancellationToken);
@@ -127,6 +150,21 @@ public class UserService : IUserService
         );
         
         return (Convert.ToBase64String(hash), Convert.ToBase64String(salt));
+    }
+
+    public bool Vertify(string password, string salt, string passwordHash)
+    {
+        byte[] saltHash = Convert.FromBase64String(salt);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+            password: password,
+            salt: saltHash,
+            iterations: 100_000,
+            hashAlgorithm: HashAlgorithmName.SHA256,
+            outputLength: 32
+        );
+        var hashPass =  Convert.ToBase64String(hash);
+        var passwordHashAndSoltString = salt + hashPass;
+        return passwordHash == passwordHashAndSoltString;
     }
 
     public static List<string> dangerInputs =

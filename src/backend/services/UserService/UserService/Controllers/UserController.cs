@@ -48,6 +48,15 @@ public class UserController : ControllerBase
         if (user == null)  BadRequest("User not found");
         return Ok(user);
     }
+
+    [HttpGet("users/auth")]
+    public async Task<ActionResult<string>> Login([FromQuery] string email, [FromQuery] string password,
+        CancellationToken cancellationToken = default)
+    {
+        if(!await _userService.ExistsByEmailAsync(email,cancellationToken)) throw new Exception($"User not found with email {email}");
+        var userToken = await _userService.Login(email, password, cancellationToken);
+        return Ok(userToken);
+    }
     
     
     
