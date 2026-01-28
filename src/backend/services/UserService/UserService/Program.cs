@@ -1,5 +1,8 @@
 using System.Reflection;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using UserService.DataAcces;
@@ -8,6 +11,7 @@ using UserService.Models;
 using UserService.Repository;
 using UserService.Repository.Intefaces;
 using UserService.Services.Interfaces;
+using UserService.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +19,41 @@ var services = builder.Services;
 var configuration = builder.Configuration;
 
 services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+var jwtOptionsSection = configuration.GetSection(nameof(JwtOptions));
+var secret = jwtOptionsSection["Secret"];
+var issuer = jwtOptionsSection["Issuer"];
+var audience = jwtOptionsSection["Audience"];
+
+// Проверяем, что все необходимые настройки есть
+if (string.IsNullOrEmpty(secret))
+    throw new InvalidOperationException("JWT Secret не настроен в appsettings.json");
+if (string.IsNullOrEmpty(issuer))
+    throw new InvalidOperationException("JWT Issuer не настроен в appsettings.json");
+if (string.IsNullOrEmpty(audience))
+    throw new InvalidOperationException("JWT Audience не настроен в appsettings.json");
+
+services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false; 
+        options.SaveToken = true;
+        
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            ValidateIssuer = true,
+            ValidIssuer = issuer,
+            ValidateAudience = true,
+            ValidAudience = audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero // Можно убрать задержку для точного времени
+        };
+    });
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -63,7 +102,7 @@ builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-builder.Services.AddScoped<JwtProvider>();
+builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 
 var app = builder.Build();
 
@@ -86,8 +125,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseRouting();
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 app.MapStaticAssets(); // Если нужно
 app.MapControllers();
 

@@ -7,12 +7,16 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace UserService.Models;
 
-public class JwtProvider (IOptions <JwtOptions> options)
+public class JwtProvider (IOptions <JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions _jwtOptions = options.Value;
     public string CreateToken(User user)
     {
-        Claim[] claims = [new("userId",  user.Id.ToString(), "email", user.Email)];
+        Claim[] claims = 
+        [
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim("userId", user.Id.ToString())
+        ];
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret)), SecurityAlgorithms.HmacSha256Signature);
         var token = new JwtSecurityToken(
@@ -28,10 +32,23 @@ public class JwtProvider (IOptions <JwtOptions> options)
     }
 }
 
-public class JwtOptions
+public class JwtOptions : IJwtOptions
 {
     public string Issuer { get; set; }
     public string Audience { get; set; }
-    public string Secret { get; set; } = String.Empty;
+    public string Secret { get; set; }
     public int ExpiresHours { get; set; } = 20;
+}
+
+public interface IJwtOptions
+{
+    public string Issuer { get; set; }
+    public string Audience { get; set; }
+    public string Secret { get; set; }
+    public int ExpiresHours { get; set; } 
+}
+
+public interface IJwtProvider
+{
+    public string CreateToken(User user);
 }

@@ -13,8 +13,8 @@ namespace UserService.Services;
 public class UserService : IUserService
 {
     private  IUserRepository _userRepository;
-    private JwtProvider _jwtProvider;
-    public UserService(IUserRepository userRepository,  JwtProvider jwtProvider)
+    private IJwtProvider _jwtProvider;
+    public UserService(IUserRepository userRepository,  IJwtProvider jwtProvider)
     {
         _userRepository = userRepository;
         _jwtProvider = jwtProvider;
