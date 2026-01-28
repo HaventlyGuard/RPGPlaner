@@ -58,6 +58,13 @@ public class UserController : ControllerBase
         Response.Cookies.Append("tasty-cookies", userToken);
         return Ok(userToken);
     }
+
+    [HttpPost("users/register")]
+    public async Task<IActionResult> Register(CreateUserDTO createdUser, CancellationToken cancellationToken = default)
+    {
+        await _userService.Register(createdUser,cancellationToken);
+        return Ok();
+    }
     
     
     
