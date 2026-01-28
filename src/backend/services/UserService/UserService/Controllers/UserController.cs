@@ -55,6 +55,7 @@ public class UserController : ControllerBase
     {
         if(!await _userService.ExistsByEmailAsync(email,cancellationToken)) throw new Exception($"User not found with email {email}");
         var userToken = await _userService.Login(email, password, cancellationToken);
+        Response.Cookies.Append("tasty-cookies", userToken);
         return Ok(userToken);
     }
     
