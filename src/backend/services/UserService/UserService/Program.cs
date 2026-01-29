@@ -24,7 +24,6 @@ var secret = jwtOptionsSection["Secret"];
 var issuer = jwtOptionsSection["Issuer"];
 var audience = jwtOptionsSection["Audience"];
 
-// Проверяем, что все необходимые настройки есть
 if (string.IsNullOrEmpty(secret))
     throw new InvalidOperationException("JWT Secret не настроен в appsettings.json");
 if (string.IsNullOrEmpty(issuer))
