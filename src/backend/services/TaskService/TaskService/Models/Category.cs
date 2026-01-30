@@ -1,6 +1,6 @@
 ﻿namespace TaskService.Models;
 
-public enum Status
+public enum Category
 {
     Sport,
     Life,

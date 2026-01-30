@@ -7,6 +7,5 @@ public class SubTicket
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; } = string.Empty;
     public TaskType TaskType { get; set; } = TaskType.Kanban;
-    public Status? Status { get; set; } 
 
 }
