@@ -7,4 +7,5 @@ public class Column
     public int Position { get; set; }
     public bool isAutoComplete { get; set; } = false;
     
+    public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

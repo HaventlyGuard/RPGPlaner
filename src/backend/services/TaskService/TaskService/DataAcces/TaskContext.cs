@@ -39,13 +39,12 @@ public class TaskContext : DbContext
             entity.Property(c => c.Category).HasConversion<string>().HasColumnName("category");
             entity.Property(c =>  c.TaskType).HasConversion<string>().HasColumnName("task_type");
 
-            entity.HasOne<Ticket>()  
-                .WithOne()         
-                .HasForeignKey<Ticket>(t => t.ColumnId)
-                .HasPrincipalKey<Column>(c => c.ColumnId)
+            entity.HasOne<Column>()
+                .WithMany(c => c.Tickets)
+                .HasForeignKey(c => c.ColumnId)  
                 .OnDelete(DeleteBehavior.Cascade);
             
-            entity.HasMany<Tag>().WithMany().UsingEntity(t => t.ToTable("tags"));
+            entity.HasMany<Tag>().WithMany();
             
             entity.HasMany<SubTicket>().WithOne().HasForeignKey(t => t.TicketId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -66,7 +65,7 @@ public class TaskContext : DbContext
                 entity.ToTable("tags");
                 entity.Property(c => c.Category).HasColumnName("category");
                 entity.Property(c => c.TagColor).HasColumnName("tag_color");
-                entity.Property(c => c.TagName).HasColumnName("tag_name");
+                entity.HasKey(c => c.TagName).HasName("tag_name");
             }
         );
         
