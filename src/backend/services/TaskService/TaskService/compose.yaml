@@ -1,0 +1,45 @@
+﻿version: '3.8'
+
+services:
+  taskservice:
+    image: taskservice
+    depends_on:
+      postgreTask:
+        condition: service_healthy  # Ждём пока БД будет готова
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+      - "8083:8083"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgreTask;Port=5432;Database=userdb;Username=postgres;Password=1
+    networks:
+      - app-network
+  
+  postgreTask:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=userdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1
+    ports:
+      - "5433:5432"  # Исправлено: 5433:5432 (внешний:внутренний)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Определяем сеть и volume
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
