@@ -274,7 +274,8 @@ public class TicketRepository : ITicketRepository
 
     public async Task<bool> CompleteTicket(Guid ticketId, CancellationToken token)
     {
-        var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.TicketId == ticketId);
+        var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.TicketId == ticketId, cancellationToken: token);
+        if (ticket == null) return false;
         ticket.isComplete = true;
         await _context.SaveChangesAsync(token);
         return true;
