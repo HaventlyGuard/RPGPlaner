@@ -1,23 +1,66 @@
-﻿using TaskService.Models;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
+using TaskService.Models;
+using TaskService.Repositories.Interfaces;
 using TaskService.Services.Interfaces;
 
 namespace TaskService.Services;
 
 public class TicketService : ITicketService
 {
+    //Нужно подумать над кешированием, для этого думаю исп редис
+    IDistributedCache _cache;
+    IColumnRepository _columnRepository;
+    ITicketRepository _ticketRepository;
+    ITagRepository _tagRepository;
+
+    public TicketService(IDistributedCache cache, IColumnRepository columnRepository,
+        ITicketRepository ticketRepository, ITagRepository tagRepository)
+    {
+        _cache = cache;
+        _columnRepository = columnRepository;
+        _ticketRepository = ticketRepository;
+        _tagRepository = tagRepository;
+    }
     public async Task<IEnumerable<Ticket>> GetAllTickets(CancellationToken token)
     {
-        throw new NotImplementedException();
+        var user = await _ticketRepository.GetAllTickets(token);
+        return user;
     }
 
     public async Task<Ticket> GetTicket(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        Ticket? cahceTicket = null;
+        var ticket =  await _ticketRepository.GetTicket(ticketId, token);
+        var ticketString = await _cache.GetStringAsync(ticketId.ToString());
+        if (ticketString != null) cahceTicket = JsonSerializer.Deserialize<Ticket>(ticketString);
+        if (cahceTicket == null)
+        {
+            cahceTicket = await _ticketRepository.GetTicket(ticketId, token);
+            if (cahceTicket != null)
+            {
+                Console.WriteLine($"Добавили ticket в кэш {cahceTicket}");
+                ticketString = JsonSerializer.Serialize(cahceTicket);
+                await _cache.SetStringAsync(ticketId.ToString(), ticketString, new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    }
+                );
+            }
+           
+        }
+        else
+        {
+            Console.WriteLine($"{ticket.Title} был извлечен из кэша");
+        }
+        return cahceTicket;
+
     }
 
     public async Task<IEnumerable<Ticket>> GetAllColumnTickets(string columnName, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var tickets = await _columnRepository.GetAllTicketsColumns(columnName, token);
+        return tickets;
     }
 
     public async Task<Ticket> UpdateTicket(Ticket ticket, CancellationToken token)
