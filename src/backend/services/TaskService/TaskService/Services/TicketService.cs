@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Data;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using TaskService.Errors.Exceptions;
 using TaskService.Models;
@@ -113,7 +115,10 @@ public class TicketService : ITicketService
         { 
             _logger.LogInformation("Try to add ticket"); 
            var addedTicket = await _ticketRepository.AddTicket(ticket, token);
-            await _cache.SetStringAsync(addedTicket.TicketId.ToString(), addedTicket.ToString(), token);
+            await _cache.SetStringAsync(addedTicket.TicketId.ToString(), addedTicket.ToString(), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            },token);
             return addedTicket;
         }
         catch (AppException e)
@@ -148,7 +153,7 @@ public class TicketService : ITicketService
         try
         {
          var isTicketDrag = await _ticketRepository.DragIntoNewColumn(newColumnName, ticket, token);
-         await _cache.RefreshAsync(ticket.TicketId.ToString(), token);
+         await _cache.RemoveAsync(ticket.ToString(), token);
          return isTicketDrag;
 
         }
@@ -209,99 +214,294 @@ public class TicketService : ITicketService
             var ticketString = await  _cache.GetStringAsync(ticketId.ToString());
             if (ticketString != null)
             {
-               await _cache.RefreshAsync(ticketId.ToString(), token);
+                var ticket = await _ticketRepository.GetTicket(ticketId, token);
+                var serilize =   JsonSerializer.Serialize<Ticket>(ticket);
+                await _cache.SetStringAsync(ticketId.ToString(),serilize,token);
             }
             return await _ticketRepository.UpdateTicketPosition(ticketId, taskPosition, token);
         }
         catch (AppException e)
         {
-            _logger.LogError($"Try to get ticket position excepion, {e}");
+            _logger.LogError($"Try to update ticket position excepion, {e}");
             throw new TaskNotFoundExcepion();
         }
     }
 
     public async Task<bool> UpdateTicketCategory(Guid ticketId, Category taskCategory, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _ticketRepository.UpdateTicketCategory(ticketId, taskCategory, token);
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to update ticket position excepion, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> DeleteTicketCategory(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _ticketRepository.DeleteCategoryToTicket(ticketId, token);
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to delete ticket category excepion, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> AddCategoryToTicket(Guid ticketId, Category taskCategory, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {   
+            
+            return await _ticketRepository.UpdateTicketCategory(ticketId, taskCategory, token);
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to update ticket position excepion, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> DeleteCategoryToTicket(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (_cache.GetString(ticketId.ToString()) != null) await _cache.RemoveAsync(ticketId.ToString(), token);
+            return await _ticketRepository.DeleteCategoryToTicket(ticketId, token);
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to delete ticket category excepion, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> AddTagToTicket(Guid ticketId, Tag taskTag, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var isAdd= await _ticketRepository.AddTagToTicket(ticketId, taskTag, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return isAdd;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to add tag to ticket exception, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> DeleteTagFromTicket(Guid ticketId, string taskTag, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var isDelete = await _ticketRepository.DeleteTagFromTicket(ticketId, taskTag, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return isDelete;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to delete tag from ticket exception, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> UpdateTagToTicket(Guid ticketId, Tag taskTag, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var isUpdate = await _ticketRepository.UpdateTagToTicket(ticketId, taskTag, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return isUpdate;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to update tag to ticket exception, {e}");
+            throw new TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> AddSubTicketToTicket(SubTicket subTicket, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var subticketIsAdded = await _ticketRepository.AddSubTicketToTicket(subTicket, token);
+            await _cache.RemoveAsync(subTicket.TicketId.ToString(), token);
+            return subticketIsAdded;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to add sub ticket to ticket exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
+       
     }
 
     public async Task<bool> DeleteSubTicketFromTicket(Guid subTicket, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var subticketIsRemoved = await _ticketRepository.DeleteSubTicketFromTicket(subTicket, token);
+            return (subticketIsRemoved);
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to delete sub ticket from ticket exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
+       
     }
 
     public async Task<bool> UpdateSubTicketToTicket(SubTicket subTicket, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var subticketIsUpdated = await _ticketRepository.UpdateSubTicketToTicket(subTicket, token);
+            await _cache.RemoveAsync(subTicket.TicketId.ToString(), token);
+            return subticketIsUpdated;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to update sub ticket to ticket exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
-    public async Task<List<ICollection<Tag>>> GetAllTicketTags(Guid ticketId, CancellationToken token)
+    public async Task<ICollection<Tag>> GetAllTicketTags(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+          
+            var tagString =  await _cache.GetStringAsync(ticketId.ToString(), token);
+            if (tagString == null)
+            {
+                var tags = await _ticketRepository.GetAllTicketTags(ticketId, token);
+                var serialize =  JsonSerializer.Serialize(tags);
+                
+                await _cache.SetStringAsync(ticketId.ToString() + "tags", serialize, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                }, token);
+                return tags;
+            }
+            var cahchedTags = await _cache.GetAsync(ticketId.ToString() + "tags", token);
+            var deserialize =  JsonSerializer.Deserialize<ICollection<Tag>>(cahchedTags);
+                return deserialize;
+            
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to get all ticket tags exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<IEnumerable<SubTicket>> GetAllTicketSubTickets(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+          
+            var subticketString =  await _cache.GetStringAsync(ticketId.ToString(), token);
+            if (subticketString == null)
+            {
+                var subtickets = await _ticketRepository.GetAllTicketSubTickets(ticketId, token);
+                var serialize =  JsonSerializer.Serialize(subtickets);
+                
+                await _cache.SetStringAsync(ticketId.ToString() + "subtickets", serialize, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                }, token);
+                return subtickets;
+            }
+            var cachedSubTickets = await _cache.GetAsync(ticketId.ToString() + "subtickets", token);
+            var deserialize =  JsonSerializer.Deserialize<IEnumerable<SubTicket>>(cachedSubTickets);
+            return deserialize;
+            
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to get all ticket tags exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> ChangePriority(Guid ticketId, Priority taskPriority, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var priorityIsChanged = await _ticketRepository.ChangePriority(ticketId, taskPriority, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return priorityIsChanged;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to change priority exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> AddDeadline(DateTime deadline, Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var addDeadline = await _ticketRepository.AddDeadline(deadline,ticketId, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return addDeadline;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to add deadline exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> DeleteDeadline(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var deletedDeadline = await _ticketRepository.DeleteDeadline(ticketId, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return deletedDeadline;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to delete deadline exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> UpdateDeadline(DateTime startDay, DateTime endDay, Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var updatedDeadline = await _ticketRepository.UpdateDeadline(startDay, endDay, ticketId, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return updatedDeadline;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to update deadline exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 
     public async Task<bool> CompleteTicket(Guid ticketId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var isComplete =  await _ticketRepository.CompleteTicket(ticketId, token);
+            await _cache.RemoveAsync(ticketId.ToString(), token);
+            return isComplete;
+        }
+        catch (AppException e)
+        {
+            _logger.LogError($"Try to complete task exception, {e}");
+            throw new  TaskNotFoundExcepion();
+        }
     }
 }

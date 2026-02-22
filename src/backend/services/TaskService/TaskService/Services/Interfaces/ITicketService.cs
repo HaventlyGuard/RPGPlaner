@@ -29,7 +29,7 @@ public interface ITicketService
     public Task<bool> DeleteSubTicketFromTicket(Guid subTicket, CancellationToken token);
     public Task<bool> UpdateSubTicketToTicket(SubTicket subTicket, CancellationToken token);
     
-    public Task<List<ICollection<Tag>>> GetAllTicketTags(Guid ticketId, CancellationToken token);
+    public Task<ICollection<Tag>> GetAllTicketTags(Guid ticketId, CancellationToken token);
     public Task<IEnumerable<SubTicket>> GetAllTicketSubTickets(Guid ticketId, CancellationToken token);
     public Task<bool> ChangePriority(Guid ticketId, Priority taskPriority, CancellationToken token);
     

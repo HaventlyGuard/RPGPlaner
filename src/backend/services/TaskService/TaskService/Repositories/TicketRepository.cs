@@ -217,11 +217,11 @@ public class TicketRepository : ITicketRepository
         return true;
     }
 
-    public async Task<List<ICollection<Tag>>> GetAllTicketTags(Guid ticketId, CancellationToken token)
+    public async Task<ICollection<Tag>> GetAllTicketTags(Guid ticketId, CancellationToken token)
     {
         var tags = await _context.Tickets
             .Where(x => x.TicketId == ticketId)
-            .Select(x => x.Tags).ToListAsync(token);
+            .SelectMany(x => x.Tags).ToListAsync(token);
 
         return tags;
     }
