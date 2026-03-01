@@ -11,7 +11,6 @@ namespace TaskService.Services;
 
 public class TicketService : ITicketService
 {
-    //Нужно подумать над кешированием, для этого думаю исп редис
     IDistributedCache _cache;
     IColumnRepository _columnRepository;
     ITicketRepository _ticketRepository;

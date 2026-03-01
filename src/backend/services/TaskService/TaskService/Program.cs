@@ -2,10 +2,22 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TaskService.DataAcces;
+using TaskService.Repositories;
+using TaskService.Repositories.Interfaces;
+using TaskService.Services;
+using TaskService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
+
+builder.Services.AddScoped<IColumnService, ColumnService>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+
+builder.Services.AddScoped<IColumnRepository, ColumnRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>

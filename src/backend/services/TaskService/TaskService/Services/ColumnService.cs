@@ -38,8 +38,6 @@ public class ColumnService : IColumnService
             if (column == null)
             {
                 _logger.LogWarning("Column not found: {ColumnId}", columnId);
-                // Возвращаем null вместо исключения, если это допустимо по контракту
-                // Если нужно исключение: throw new KeyNotFoundException($"Column '{columnId}' not found");
             }
             else
             {
@@ -64,7 +62,6 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем, не существует ли уже колонка с таким ID
             if (!string.IsNullOrEmpty(column.ColumnId))
             {
                 var existingColumn = await _columnRepository.GetColumn(column.ColumnId, token);
@@ -75,7 +72,6 @@ public class ColumnService : IColumnService
                 }
             }
 
-            // Проверяем уникальность имени (опционально, если требуется)
             var allColumns = await _columnRepository.GetAllColumns(token);
             if (allColumns.Any(c => 
                 string.Equals(c.Name, column.Name, StringComparison.OrdinalIgnoreCase)))
@@ -84,7 +80,6 @@ public class ColumnService : IColumnService
                 throw new InvalidOperationException($"Column with name '{column.Name}' already exists");
             }
 
-            // Автогенерация ID если не указан
             if (string.IsNullOrEmpty(column.ColumnId))
             {
                 column.ColumnId = GenerateColumnId(column.Name);
@@ -113,15 +108,13 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем существование колонки
             var existingColumn = await _columnRepository.GetColumn(column.ColumnId, token);
             if (existingColumn == null)
             {
                 _logger.LogWarning("Column not found for update: {ColumnId}", column.ColumnId);
-                return false; // Или throw new KeyNotFoundException
+                return false; 
             }
 
-            // Проверяем уникальность имени (если имя изменилось)
             if (!string.Equals(existingColumn.Name, column.Name, StringComparison.OrdinalIgnoreCase))
             {
                 var allColumns = await _columnRepository.GetAllColumns(token);
@@ -154,15 +147,13 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем существование колонки
             var existingColumn = await _columnRepository.GetColumn(columnId, token);
             if (existingColumn == null)
             {
                 _logger.LogWarning("Column not found for deletion: {ColumnId}", columnId);
-                return false; // Или throw new KeyNotFoundException
+                return false; 
             }
 
-            // Проверяем, есть ли тикеты в этой колонке
             var ticketsInColumn = await _columnRepository.GetAllTicketsColumns(columnId, token);
             if (ticketsInColumn.Any())
             {
@@ -194,7 +185,6 @@ public class ColumnService : IColumnService
             throw new ArgumentException("Color cannot be null or empty", nameof(newColor));
         }
 
-        // Валидация HEX цвета
         if (!IsValidHexColor(newColor))
         {
             throw new ArgumentException("Color must be a valid HEX color (#RRGGBB or #RGB)", nameof(newColor));
@@ -204,7 +194,6 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем существование колонки
             var existingColumn = await _columnRepository.GetColumn(columnId, token);
             if (existingColumn == null)
             {
@@ -237,7 +226,6 @@ public class ColumnService : IColumnService
             {
                 _logger.LogDebug("Retrieved {Count} columns", columns.Count());
                 
-                // Сортируем по позиции если нужно
                 columns = columns.OrderBy(c => c.Position).ToList();
             }
 
@@ -261,7 +249,6 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем существование колонки
             var column = await _columnRepository.GetColumn(columnId, token);
             if (column == null)
             {
@@ -274,7 +261,6 @@ public class ColumnService : IColumnService
             _logger.LogDebug("Retrieved {Count} tickets for column {ColumnId}", 
                 tickets.Count(), columnId);
 
-            // Сортируем по позиции если нужно
             return tickets.OrderBy(t => t.Position).ToList();
         }
         catch (Exception ex)
@@ -284,7 +270,6 @@ public class ColumnService : IColumnService
         }
     }
 
-    // Дополнительные методы для бизнес-логики
 
     public async Task<bool> ReorderColumns(List<string> columnIdsInOrder, CancellationToken token)
     {
@@ -297,25 +282,21 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Получаем все колонки для проверки
             var allColumns = await _columnRepository.GetAllColumns(token);
             var allColumnIds = allColumns.Select(c => c.ColumnId).ToList();
             
-            // Проверяем, что все указанные ID существуют
             var missingColumns = columnIdsInOrder.Except(allColumnIds).ToList();
             if (missingColumns.Any())
             {
                 throw new ArgumentException($"Columns not found: {string.Join(", ", missingColumns)}");
             }
 
-            // Проверяем, что нет лишних колонок (все колонки должны быть в списке)
             var extraColumns = allColumnIds.Except(columnIdsInOrder).ToList();
             if (extraColumns.Any())
             {
                 throw new ArgumentException($"Missing columns in order list: {string.Join(", ", extraColumns)}");
             }
 
-            // Обновляем позиции
             for (int i = 0; i < columnIdsInOrder.Count; i++)
             {
                 var columnId = columnIdsInOrder[i];
@@ -355,35 +336,30 @@ public class ColumnService : IColumnService
 
         try
         {
-            // Проверяем существование тикета
             var ticket = await _ticketRepository.GetTicket(ticketId, token);
             if (ticket == null)
             {
                 throw new KeyNotFoundException($"Ticket '{ticketId}' not found");
             }
 
-            // Проверяем существование целевой колонки
             var targetColumn = await _columnRepository.GetColumn(targetColumnId, token);
             if (targetColumn == null)
             {
                 throw new KeyNotFoundException($"Target column '{targetColumnId}' not found");
             }
 
-            // Проверяем, не пытаемся ли переместить в ту же колонку
             if (ticket.ColumnId == targetColumnId)
             {
                 _logger.LogWarning("Ticket {TicketId} is already in column {ColumnId}", 
                     ticketId, targetColumnId);
-                return false; // Или true, если это допустимо
+                return false; 
             }
 
-            // Получаем все тикеты в целевой колонке для определения новой позиции
             var targetColumnTickets = await _columnRepository.GetAllTicketsColumns(targetColumnId, token);
             var newPosition = targetColumnTickets.Any() 
                 ? targetColumnTickets.Max(t => t.Position) + 1 
                 : 0;
 
-            // Обновляем тикет
             ticket.ColumnId = targetColumnId;
             ticket.Position = newPosition;
             
@@ -430,7 +406,6 @@ public class ColumnService : IColumnService
         }
     }
 
-    // Вспомогательные методы
 
     private void ValidateColumn(Column column, bool isNew)
     {
@@ -459,7 +434,6 @@ public class ColumnService : IColumnService
             throw new ArgumentException("Column position cannot be negative", nameof(column.Position));
         }
 
-        // Валидация цвета если указан
         if (!string.IsNullOrEmpty(column.Color) && !IsValidHexColor(column.Color))
         {
             throw new ArgumentException("Color must be a valid HEX color (#RRGGBB or #RGB)", nameof(column.Color));
@@ -471,7 +445,6 @@ public class ColumnService : IColumnService
         if (string.IsNullOrWhiteSpace(color))
             return false;
 
-        // Проверка HEX формата (#RRGGBB или #RGB)
         return System.Text.RegularExpressions.Regex.IsMatch(
             color, 
             "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
@@ -479,7 +452,6 @@ public class ColumnService : IColumnService
 
     private string GenerateColumnId(string columnName)
     {
-        // Генерация ID на основе имени и timestamp
         var sanitizedName = columnName
             .ToLowerInvariant()
             .Replace(" ", "-")

@@ -1,11 +1,11 @@
-﻿using System.Text.Json.Nodes;
+﻿using TaskService.Models;
 
-namespace TaskService.Models;
-
-public class Ticket
+namespace TaskService.DTO.Ticket;
+using TaskService.Models;
+public class TicketResponse
 {
     public Guid TicketId { get; set; }
-    public string ColumnId { get; set; } = "default";
+    public string ColumnId { get; set; } 
     public DateTime? StartDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; } = DateTime.UtcNow;
     public string Title { get; set; } = string.Empty;
@@ -17,9 +17,4 @@ public class Ticket
     public int Position { get; set; }
     public bool isComplete {get; set;} = false;
     public string Color { get; set; } = "B3B3B3";
-    
-    
-    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
-    public virtual ICollection<SubTicket> SubTickets { get; set; } = null!;
 }
-
