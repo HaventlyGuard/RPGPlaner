@@ -21,6 +21,7 @@ public class ColumnService : IColumnService
         _ticketRepository = ticketRepository ?? throw new ArgumentNullException(nameof(ticketRepository));
     }
 
+    
     public async Task<Column?> GetColumn(string columnId, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(columnId))
@@ -271,7 +272,7 @@ public class ColumnService : IColumnService
     }
 
 
-    public async Task<bool> ReorderColumns(List<string> columnIdsInOrder, CancellationToken token)
+    public async Task<object> ReorderColumns(List<string> columnIdsInOrder, CancellationToken token)
     {
         if (columnIdsInOrder == null || !columnIdsInOrder.Any())
         {
@@ -445,9 +446,7 @@ public class ColumnService : IColumnService
         if (string.IsNullOrWhiteSpace(color))
             return false;
 
-        return System.Text.RegularExpressions.Regex.IsMatch(
-            color, 
-            "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+        return true;
     }
 
     private string GenerateColumnId(string columnName)

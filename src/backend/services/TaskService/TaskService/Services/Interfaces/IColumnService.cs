@@ -14,4 +14,5 @@ public interface IColumnService
     
     public Task<IEnumerable<Column>> GetAllColumns(CancellationToken token);
     public Task<IEnumerable<Ticket>> GetAllTicketsColumns(string columnId, CancellationToken token);
+    Task<object> ReorderColumns(List<string> reorderDtoColumnIds, CancellationToken cancellationToken);
 }
