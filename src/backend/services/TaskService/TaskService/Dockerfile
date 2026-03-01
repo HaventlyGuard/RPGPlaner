@@ -2,10 +2,17 @@
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
+EXPOSE 8082
+
+
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ENV NUGET_PACKAGES=/root/.nuget/packages
+ENV NUGET_HTTP_CACHE_PATH=/root/.local/share/NuGet/v3-cache
+ENV NUGET_ENHANCED_MAX_NETWORK_TRY_COUNT=10
+ENV NUGET_ENHANCED_NETWORK_RETRY_DELAY_MILLISECONDS=2000
+
 WORKDIR /src
 COPY ["TaskService.csproj", "./"]
 RUN dotnet restore "TaskService.csproj"

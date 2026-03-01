@@ -52,6 +52,7 @@ services:
       - "8082:8082"
       - "8083:8083"
     environment:
+      - ASPNETCORE_URLS=http://+:8082
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgreTask;Port=5432;Database=userdb;Username=postgres;Password=1
     networks:
