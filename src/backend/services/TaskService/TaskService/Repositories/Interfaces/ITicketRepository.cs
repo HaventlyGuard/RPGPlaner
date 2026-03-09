@@ -40,4 +40,6 @@ public interface ITicketRepository
     
     public Task<bool> CompleteTicket(Guid ticketId, CancellationToken token);
     
+    public Task<bool> SetTicketPrice(Guid ticketId, int price, CancellationToken token);
+    
 }

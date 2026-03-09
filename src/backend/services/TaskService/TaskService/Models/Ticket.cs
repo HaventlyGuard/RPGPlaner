@@ -18,6 +18,8 @@ public class Ticket
     public bool isComplete {get; set;} = false;
     public string Color { get; set; } = "B3B3B3";
     
+    public int Price { get; set; } = 5;
+    
     
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
     public virtual ICollection<SubTicket> SubTickets { get; set; } = null!;

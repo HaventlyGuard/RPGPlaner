@@ -26,11 +26,13 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddStackExchangeRedisCache(options => {
-    options.Configuration = "localhost";
-    options.InstanceName = "local";
-});
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
+var redisInstanceName = Environment.GetEnvironmentVariable("REDIS_INSTANCE_NAME") ?? "local";
 
+services.AddStackExchangeRedisCache(options => {
+    options.Configuration = "redis_container:6379,password=1";
+    options.InstanceName = redisInstanceName;
+});
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "User Service API", Version = "v1" });

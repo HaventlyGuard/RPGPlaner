@@ -503,4 +503,9 @@ public class TicketService : ITicketService
             throw new  TaskNotFoundExcepion();
         }
     }
+
+    public async Task<bool> SetTicketPriceAsync(Guid ticketId, int price, CancellationToken token)
+    {
+        return await _ticketRepository.SetTicketPrice(ticketId, price, token);
+    }
 }

@@ -70,7 +70,7 @@ public class TicketRepository : ITicketRepository
             TaskType = ticket.TaskType,
             Tags = ticket.Tags,
             isComplete = ticket.isComplete,
-            StartDate = DateTime.Now,
+            StartDate = DateTime.UtcNow,
             EndDate = ticket.EndDate,
             SubTickets = ticket.SubTickets,
 
@@ -277,6 +277,14 @@ public class TicketRepository : ITicketRepository
         var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.TicketId == ticketId, cancellationToken: token);
         if (ticket == null) return false;
         ticket.isComplete = true;
+        await _context.SaveChangesAsync(token);
+        return true;
+    }
+
+    public async Task<bool> SetTicketPrice(Guid ticketId, int price, CancellationToken token)
+    {
+        var ticket = await GetTicket(ticketId, token);
+        ticket.Price = price;
         await _context.SaveChangesAsync(token);
         return true;
     }

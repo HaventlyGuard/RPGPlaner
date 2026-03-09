@@ -38,4 +38,6 @@ public interface ITicketService
     public Task<bool> UpdateDeadline(DateTime startDay, DateTime endDay, Guid ticketId, CancellationToken token);
     
     public Task<bool> CompleteTicket(Guid ticketId, CancellationToken token);
+
+    public Task<bool> SetTicketPriceAsync(Guid ticketId, int price, CancellationToken token);
 }

@@ -44,7 +44,7 @@ services:
     image: taskservice
     depends_on:
       postgreTask:
-        condition: service_healthy  # Ждём пока БД будет готова
+        condition: service_healthy  
     build:
       context: .
       dockerfile: Dockerfile
@@ -53,6 +53,8 @@ services:
       - "8083:8083"
     environment:
       - ASPNETCORE_URLS=http://+:8082
+      - Redis__Configuration=redis_container:6379  
+      - Redis__InstanceName=local
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgreTask;Port=5432;Database=userdb;Username=postgres;Password=1
     networks:
